@@ -84,7 +84,10 @@ def optimize(
         merged_params = dict_utils.merge_dicts(unwraped_params, sample_params)
         wraped_params = dict_utils.wrap_dict(merged_params)
 
-        logging.info("Evaluating parameters: %s", dict_utils.serialize_json(sample_params, indent=4))
+        logging.info(
+            "Evaluating parameters: %s",
+            dict_utils.serialize_json(sample_params, indent=4),
+        )
 
         # Create temporary experiment directory
         if binary is not None:
@@ -96,25 +99,21 @@ def optimize(
 
             params_path = os.path.join(experiment_dir, "params.json")
             results_path = os.path.join(experiment_dir, "results.json")
-
-            path_params = {
-                "experiment_dir": experiment_dir,
-                "params_path": params_path,
-                "results_path": results_path,
-            }
         else:
-            path_params = {}
+            experiment_dir = ""
+            params_path = ""
+            results_path = ""
+
+        extra_params = {
+            "experiment_dir": experiment_dir,
+            "params_path": params_path,
+            "results_path": results_path,
+        }
 
         # Call all callable functions
         wraped_params = {
             k: (
-                v(
-                    {
-                        "name": k,
-                        "params": wraped_params,
-                        **path_params,
-                    }
-                )
+                v({"name": k, "params": wraped_params, **extra_params})
                 if callable(v)
                 else v
             )
@@ -152,7 +151,7 @@ def optimize(
                 "params": dict_utils.wrap_dict(sample_params),
                 "results": results,
                 "objective": obj_val,
-                **path_params,
+                **extra_params,
             }
         )
 
@@ -175,15 +174,17 @@ def optimize(
     assert res.fun == best["objective"]
 
     if binary is not None:
-        with open(os.path.join(output_dir, "results.txt"), "w") as f:
-            f.write(f"Parameter group {name}\n")
-            f.write(f"Best experiment: {best['experiment_dir']}\n")
-            f.write("Best results:\n")
-            f.write(dict_utils.serialize_json(best["results"], indent=4))
-            f.write("\nBest params:\n")
-            f.write(dict_utils.serialize_json(best["params"], indent=4))
-            f.write("\n")
-
-        logging.info(open(os.path.join(output_dir, "results.txt")).read())
+        results_path = os.path.join(output_dir, "results.txt")
+        summary = "\n".join([
+            f"Parameter group {name}",
+            f"Best experiment: {best['experiment_dir']}",
+            "Best results:",
+            dict_utils.serialize_json(best["results"], indent=4),
+            "Best params:",
+            dict_utils.serialize_json(best["params"], indent=4)
+        ])
+        logging.info(f"Writing results to {results_path}:\n{summary}")
+        with open(results_path, "w") as f:
+            f.write(summary)
     else:
         return best
