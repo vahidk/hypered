@@ -4,6 +4,7 @@ This module provides a function to optimize hyperparameters using Gaussian Proce
 It supports the creation of experiments, managing directories, and executing subprocesses for the experiments.
 """
 
+import logging
 import os
 import shlex
 import subprocess
@@ -19,8 +20,9 @@ from .common import dict_utils, registry
 def optimize(
     name: str,
     objective: Callable,
-    binary: str,
     params: dict,
+    binary: Optional[str] = None,
+    function: Optional[Callable] = None,
     random_starts: int = 10,
     iterations: int = 100,
     seed: int = 0,
@@ -33,8 +35,9 @@ def optimize(
     Args:
         name (str): The name of the parameter group.
         objective (function): The objective function to minimize. It should take a dictionary of results and return a scalar value.
-        binary (str): The command line binary to execute the experiment.
         params (dict): The dictionary of parameters to optimize.
+        binary (str, optional): The command line binary to execute the experiment.
+        function (function, optional): The function to execute the experiment.
         random_starts (int, optional): The number of random initialization points. Defaults to 10.
         iterations (int, optional): The number of iterations to run the optimization. Defaults to 100.
         seed (int, optional): The random seed for reproducibility. Defaults to 0.
@@ -44,11 +47,15 @@ def optimize(
     Returns:
         None
     """
-    print("Parameter group:", name)
+    if binary is None and function is None:
+        raise ValueError("Either binary or function must be provided.")
 
-    output_dir = os.path.abspath(os.path.join(misc.OUTPUT_DIR, name))
-    if not os.path.exists(output_dir):
-        os.makedirs(output_dir)
+    logging.info("Parameter group: %s", name)
+
+    if binary is not None:
+        output_dir = os.path.abspath(os.path.join(misc.OUTPUT_DIR, name))
+        if not os.path.exists(output_dir):
+            os.makedirs(output_dir)
 
     unwraped_params = dict_utils.unwrap_dict(params)
 
@@ -77,14 +84,26 @@ def optimize(
         merged_params = dict_utils.merge_dicts(unwraped_params, sample_params)
         wraped_params = dict_utils.wrap_dict(merged_params)
 
-        # Create temporary experiment directory
-        m = dict_utils.hash_json(sample_params)
-        experiment_dir = os.path.join(output_dir, m)
-        if not os.path.exists(experiment_dir):
-            os.makedirs(experiment_dir)
+        logging.info("Evaluating parameters: %s", dict_utils.serialize_json(sample_params, indent=4))
 
-        params_path = os.path.join(experiment_dir, "params.json")
-        results_path = os.path.join(experiment_dir, "results.json")
+        # Create temporary experiment directory
+        if binary is not None:
+            experiment_dir = os.path.join(
+                output_dir, dict_utils.hash_json(sample_params)
+            )
+            if not os.path.exists(experiment_dir):
+                os.makedirs(experiment_dir)
+
+            params_path = os.path.join(experiment_dir, "params.json")
+            results_path = os.path.join(experiment_dir, "results.json")
+
+            path_params = {
+                "experiment_dir": experiment_dir,
+                "params_path": params_path,
+                "results_path": results_path,
+            }
+        else:
+            path_params = {}
 
         # Call all callable functions
         wraped_params = {
@@ -93,9 +112,7 @@ def optimize(
                     {
                         "name": k,
                         "params": wraped_params,
-                        "experiment_dir": experiment_dir,
-                        "params_path": params_path,
-                        "results_path": results_path,
+                        **path_params,
                     }
                 )
                 if callable(v)
@@ -104,33 +121,38 @@ def optimize(
             for k, v in wraped_params.items()
         }
 
-        # Write params to file
-        with open(params_path, "w") as f:
-            f.write(dict_utils.serialize_json(wraped_params, indent=4))
+        if function is not None:
+            results = function(wraped_params)
+        elif binary is not None:
+            # Write params to file
+            with open(params_path, "w") as f:
+                f.write(dict_utils.serialize_json(wraped_params, indent=4))
 
-        # Call subprocess to perform the experiment
-        if not os.path.exists(results_path):
-            print("Launching experiment...")
-            cmd = binary.format(params_path=params_path, results_path=results_path)
-            print(cmd)
-            popen = subprocess.Popen(shlex.split(cmd), cwd=cwd)
-            popen.wait()
-            print("Done.")
+            # Call subprocess to perform the experiment
+            if not os.path.exists(results_path):
+                logging.info("Launching experiment...")
+                cmd = binary.format(params_path=params_path, results_path=results_path)
+                logging.info(cmd)
+                popen = subprocess.Popen(shlex.split(cmd), cwd=cwd)
+                popen.wait()
+                logging.info("Done.")
+            else:
+                logging.info("Skipping experiment.")
+
+            # Read results
+            with open(results_path) as f:
+                results = dict_utils.deserialize_json(f.read())
         else:
-            print("Skipping experiment.")
-
-        # Read results
-        with open(results_path) as f:
-            results = dict_utils.deserialize_json(f.read())
+            raise ValueError("Either binary or function must be provided.")
 
         obj_val = objective(results)
 
         experiments.append(
             {
-                "experiment_dir": experiment_dir,
-                "params_path": dict_utils.wrap_dict(sample_params),
-                "results_path": results,
+                "params": dict_utils.wrap_dict(sample_params),
+                "results": results,
                 "objective": obj_val,
+                **path_params,
             }
         )
 
@@ -152,13 +174,16 @@ def optimize(
             best = exp
     assert res.fun == best["objective"]
 
-    with open(os.path.join(output_dir, "results.txt"), "w") as f:
-        f.write(f"Parameter group {name}\n")
-        f.write(f"Best experiment: {best['experiment_dir']}\n")
-        f.write("Best results:\n")
-        f.write(dict_utils.serialize_json(best["results_path"], indent=4))
-        f.write("\nBest params:\n")
-        f.write(dict_utils.serialize_json(best["params_path"], indent=4))
-        f.write("\n")
+    if binary is not None:
+        with open(os.path.join(output_dir, "results.txt"), "w") as f:
+            f.write(f"Parameter group {name}\n")
+            f.write(f"Best experiment: {best['experiment_dir']}\n")
+            f.write("Best results:\n")
+            f.write(dict_utils.serialize_json(best["results"], indent=4))
+            f.write("\nBest params:\n")
+            f.write(dict_utils.serialize_json(best["params"], indent=4))
+            f.write("\n")
 
-    print(open(os.path.join(output_dir, "results.txt")).read())
+        logging.info(open(os.path.join(output_dir, "results.txt")).read())
+    else:
+        return best

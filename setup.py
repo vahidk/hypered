@@ -16,7 +16,7 @@ with open(os.path.join(this_directory, "README.md")) as f:
 
 setup(
     name="hypered",
-    version="1.0.0",
+    version="1.0.1",
     description="Simple hyper parameter tuning model.",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -28,7 +28,7 @@ setup(
     install_requires=install_requires,
     entry_points={
         'console_scripts': [
-            'hypered=hypered.hypered:main',
+            'hypered=hypered.cli:main',
         ],
     },
 )

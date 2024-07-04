@@ -12,6 +12,7 @@ Args:
 """
 
 import argparse
+import logging
 
 from . import interface
 from .interface.common import registry
@@ -19,6 +20,8 @@ from .interface.common import registry
 
 def main():
     """Main function to run the hyperparameter optimization."""
+    logging.basicConfig(level=logging.INFO)
+
     parser = argparse.ArgumentParser(description="Hyperparameter optimizer.")
     parser.add_argument("config", type=str, help="Configuration file path.")
     args = parser.parse_args()
