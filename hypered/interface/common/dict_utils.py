@@ -1,6 +1,6 @@
 """Utility functions for dictionary manipulation, JSON serialization, and hashing."""
 
-from typing import Any, Optional
+from typing import Any, Optional, Callable
 
 import ast
 import hashlib
@@ -83,6 +83,23 @@ def merge_dicts(base: dict, *args) -> dict:
         for k, v in arg.items():
             merged[k] = v
     return merged
+
+
+def join_dicts(objs: list[Any], fn: Callable = list):
+    """
+    Joins multiple dictionaries together.
+
+    Args:
+        objs (list[Any]): The list of dictionaries to join
+        fn (Callable, optional): The function to use for joining the values. Defaults to list.
+
+    Returns:
+        dict: The merged dictionary.
+    """
+    if isinstance(objs[0], dict):
+        return {k: join_dicts([obj[k] for obj in objs], fn=fn) for k in objs[0].keys()}
+    else:
+        return fn(objs)
 
 
 def lookup_flat(dic: dict, flat_key: str, sep: str = ".") -> Any:

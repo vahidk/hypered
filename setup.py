@@ -5,7 +5,7 @@ from distutils.core import setup
 from setuptools import find_packages
 
 # List of runtime dependencies required by this built package
-install_requires = ["scikit-optimize"]
+install_requires = ["scikit-optimize", "flask", "watchdog"]
 if sys.version_info <= (2, 7):
     install_requires += ["future", "typing"]
 
@@ -29,6 +29,7 @@ setup(
     entry_points={
         'console_scripts': [
             'hypered=hypered.cli:main',
+            'hypered-dash=hypered.serve:main',
         ],
     },
 )
