@@ -8,7 +8,6 @@ python main.py
 
 """
 
-import argparse
 import json
 
 import numpy as np
@@ -44,7 +43,7 @@ def main():
             "x": hp.real(-10, 10),
         },
     )
-    print(params)
+    print(json.dumps(params, indent=4))
 
 
 if __name__ == "__main__":
