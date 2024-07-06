@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <title>Hypered Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css"
+        integrity="sha512-jnSuA4Ss2PkkikSOLtYs8BlYIeeIK1h99ty4YfvRPAlzr377vr3CXDb7sb7eEEBYjDtcYj+AjBH3FLv5uSJuXg=="
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/plotly.js/1.33.1/plotly.min.js"
+        integrity="sha512-V0j9LhrK9IMNdFYZqh+IqU4cjo7wdxyHNyH+L0td4HryBuZ7Oq6QxP2/CWr6TituX31+gv5PnolvERuTbz8UNA=="
+        crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <style>
+        body {
+            display: flex;
+        }
+
+        #sidebar {
+            width: 250px;
+            padding: 20px;
+            border-right: 1px solid #ddd;
+        }
+
+        #main {
+            flex: 1;
+            padding: 20px;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="sidebar">
+        <form id="experiment-form">
+            <div class="form-group mb-3">
+                <label class="fw-bold">Experiments</label>
+                <div id="experiment-groups"></div>
+            </div>
+            <div class="form-group mb-3">
+                <label class="fw-bold">Variables</label>
+                <div id="variables"></div>
+            </div>
+            <div class="form-group mb-3">
+                <label class="fw-bold">Metrics</label>
+                <div id="metrics"></div>
+            </div>
+        </form>
+    </div>
+    <div id="main">
+        <div id="plot-grid" class="row"></div>
+    </div>
+
+    <script>
+        loadExperiments();
+
+        function loadExperiments() {
+            fetch(`/experiment_groups`)
+                .then(response => response.json())
+                .then(data => {
+                    const experimentGroups = document.getElementById('experiment-groups');
+                    experimentGroups.innerHTML = '';
+                    data.forEach((group, index) => {
+                        const div = document.createElement('div');
+                        div.classList.add('form-check');
+
+                        const input = document.createElement('input');
+                        input.classList.add('form-check-input');
+                        input.type = 'radio';
+                        input.name = 'group';
+                        input.value = group;
+                        input.id = `group-${group}`;
+                        input.checked = index === 0;
+                        input.onchange = loadExperimentGroup;
+                        div.appendChild(input);
+
+                        const label = document.createElement('label');
+                        label.classList.add('form-check-label');
+                        label.htmlFor = `group-${group}`;
+                        label.textContent = group;
+                        div.appendChild(label);
+
+                        experimentGroups.appendChild(div);
+                    });
+                    loadExperimentGroup();
+                });
+        }
+
+        function loadExperimentGroup() {
+            const groupName = document.querySelector('input[name="group"]:checked').value;
+            fetch(`/experiment_group/${groupName}/names`)
+                .then(response => response.json())
+                .then(data => {
+                    const variablesDiv = document.getElementById('variables');
+                    const metricsDiv = document.getElementById('metrics');
+                    variablesDiv.innerHTML = '';
+                    metricsDiv.innerHTML = '';
+
+                    data.variables.forEach(variable => {
+                        const div = document.createElement('div');
+                        div.classList.add('form-check');
+
+                        const input = document.createElement('input');
+                        input.classList.add('form-check-input');
+                        input.type = 'checkbox';
+                        input.name = 'variable';
+                        input.value = variable;
+                        input.id = `variable-${variable}`;
+                        input.checked = true;
+                        input.onchange = updatePlots;
+                        div.appendChild(input);
+
+                        const label = document.createElement('label');
+                        label.classList.add('form-check-label');
+                        label.htmlFor = `variable-${variable}`;
+                        label.textContent = variable;
+                        div.appendChild(label);
+
+                        variablesDiv.appendChild(div);
+                    });
+
+                    data.metrics.forEach(metric => {
+                        const div = document.createElement('div');
+                        div.classList.add('form-check');
+
+                        const input = document.createElement('input');
+                        input.classList.add('form-check-input');
+                        input.type = 'checkbox';
+                        input.name = 'metric';
+                        input.value = metric;
+                        input.id = `metric-${metric}`;
+                        input.checked = true;
+                        input.onchange = updatePlots;
+                        div.appendChild(input);
+
+                        const label = document.createElement('label');
+                        label.classList.add('form-check-label');
+                        label.htmlFor = `metric-${metric}`;
+                        label.textContent = metric;
+                        div.appendChild(label);
+
+                        metricsDiv.appendChild(div);
+                    });
+
+                    updatePlots();
+                });
+        }
+
+        function updatePlots() {
+            const groupName = document.querySelector('input[name="group"]:checked').value;
+            const selectedVariables = Array.from(document.querySelectorAll('input[name="variable"]:checked')).map(input => input.value);
+            const selectedMetrics = Array.from(document.querySelectorAll('input[name="metric"]:checked')).map(input => input.value);
+
+            fetch(`/experiment_group/${groupName}/data`, {
+                method: 'GET',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+            })
+                .then(response => response.json())
+                .then(data => {
+                    const plotGrid = document.getElementById('plot-grid');
+                    plotGrid.innerHTML = '';
+
+                    selectedVariables.forEach(variable => {
+                        selectedMetrics.forEach(metric => {
+                            const colDiv = document.createElement('div');
+                            colDiv.classList.add('col-md-6');
+                            const plotDiv = document.createElement('div');
+                            plotDiv.style.width = '100%';
+                            plotDiv.style.height = '400px';
+                            plotDiv.id = `plot-${variable}-${metric}`;
+                            colDiv.appendChild(plotDiv);
+                            plotGrid.appendChild(colDiv);
+
+                            const trace = {
+                                x: data.variables[variable],
+                                y: data.metrics[metric],
+                                mode: 'markers',
+                                type: 'scatter',
+                                marker: { color: 'blue' },
+                            };
+
+                            const layout = {
+                                xaxis: { title: variable },
+                                yaxis: { title: metric }
+                            };
+
+                            Plotly.newPlot(plotDiv.id, [trace], layout);
+                        });
+                    });
+                });
+        }
+
+        document.querySelectorAll('input[name="variable"], input[name="metric"]').forEach(input => {
+            input.addEventListener('change', updatePlots);
+        });
+    </script>
+</body>
+
+</html>
