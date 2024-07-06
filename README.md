@@ -32,8 +32,8 @@ import numpy as np
 def main(params_path: str, results_path: str):
     params = json.loads(open(params_path).read())
 
-    op = params["vars"]["option"]
-    x = params["vars"]["x"]
+    op = params["option"]
+    x = params["x"]
 
     if op == "first":
         loss = np.square(x - 5)
@@ -72,12 +72,8 @@ optimize(
     iterations=30,
     parallelism=8,
     params={
-        "output_dir": experiment_dir(),
-        "device_id": device_id(4),
-        "vars": {
-            "option": categorical(["first", "second"]),
-            "x": real(-10, 10)
-        }
+        "option": categorical(["first", "second"]),
+        "x": real(-10, 10)
     }
 )
 ```

@@ -16,7 +16,7 @@ with open(os.path.join(this_directory, "README.md")) as f:
 
 setup(
     name="hypered",
-    version="1.0.4",
+    version="1.0.5",
     description="Simple hyper parameter tuning model.",
     long_description=long_description,
     long_description_content_type="text/markdown",

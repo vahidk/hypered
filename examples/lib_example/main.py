@@ -10,13 +10,15 @@ python main.py
 
 import argparse
 import json
+
 import numpy as np
+
 import hypered as hp
 
 
-def eval_objective(params: dict):
-    op = params["vars"]["option"]
-    x = params["vars"]["x"]
+def eval_objective(params: dict) -> dict:
+    op = params["option"]
+    x = params["x"]
 
     if op == "first":
         loss = np.square(x - 5)
@@ -26,7 +28,6 @@ def eval_objective(params: dict):
         print("Invalid option", op)
         exit(0)
 
-    print(x, loss)
     return {"loss": loss}
 
 
@@ -39,11 +40,8 @@ def main():
         iterations=30,
         parallelism=8,
         params={
-            "device_id": hp.device_id(4),
-            "vars": {
-                "option": hp.categorical(["first", "second"]),
-                "x": hp.real(-10, 10),
-            },
+            "option": hp.categorical(["first", "second"]),
+            "x": hp.real(-10, 10),
         },
     )
     print(params)

@@ -2,14 +2,13 @@
 
 import argparse
 import json
+
 import numpy as np
 
 
-def main(params_path: str, results_path: str):
-    params = json.loads(open(params_path).read())
-
-    op = params["vars"]["option"]
-    x = params["vars"]["x"]
+def eval_objective(params: dict) -> dict:
+    op = params["option"]
+    x = params["x"]
 
     if op == "first":
         loss = np.square(x - 5)
@@ -19,10 +18,12 @@ def main(params_path: str, results_path: str):
         print("Invalid option", op)
         exit(0)
 
-    print(x, loss)
-    results = {
-        "loss": loss
-    }
+    return {"loss": loss}
+
+
+def main(params_path: str, results_path: str):
+    params = json.loads(open(params_path).read())
+    results = eval_objective(params)
     with open(results_path, "w") as f:
         f.write(json.dumps(results))
 
