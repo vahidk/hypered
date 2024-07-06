@@ -46,6 +46,7 @@
         </form>
     </div>
     <div id="main">
+        <div id="overview" class="row bg-light rounded"></div>
         <div id="plot-grid" class="row"></div>
     </div>
 
@@ -157,6 +158,33 @@
             })
                 .then(response => response.json())
                 .then(data => {
+                    const overview = document.getElementById('overview');
+                    overview.innerHTML = '';
+
+                    if (data.best) {
+                        overview.classList.add('p-3');
+
+                        const bestVariables = document.createElement('div');
+                        bestVariables.classList.add('col-md-6');
+                        bestVariables.innerHTML = '<b>Variables</b>';
+                        Object.keys(data.best.variables).forEach(variable => {
+                            const value = data.best.variables[variable];
+                            bestVariables.innerHTML += `<div>${variable}: ${value}</div>`;
+                        });
+                        overview.appendChild(bestVariables);
+
+                        const bestMetrics = document.createElement('div');
+                        bestMetrics.classList.add('col-md-6');
+                        bestMetrics.innerHTML = '<b>Metrics</b>';
+                        Object.keys(data.best.metrics).forEach(metric => {
+                            const value = data.best.metrics[metric];
+                            bestMetrics.innerHTML += `<div>${metric}: ${value}</div>`;
+                        });
+                        overview.appendChild(bestMetrics);
+                    } else {
+                        overview.classList.remove('p-3');
+                    }
+
                     const plotGrid = document.getElementById('plot-grid');
                     plotGrid.innerHTML = '';
 

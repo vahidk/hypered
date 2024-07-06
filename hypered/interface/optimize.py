@@ -174,17 +174,14 @@ def optimize(
     assert res.fun == best["objective"]
 
     if binary is not None:
-        results_path = os.path.join(output_dir, "results.txt")
-        summary = "\n".join([
-            f"Parameter group {name}",
-            f"Best experiment: {best['experiment_dir']}",
-            "Best results:",
-            dict_utils.serialize_json(best["results"], indent=4),
-            "Best params:",
-            dict_utils.serialize_json(best["params"], indent=4)
-        ])
-        logging.info(f"Writing results to {results_path}:\n{summary}")
-        with open(results_path, "w") as f:
+        summary_path = os.path.join(output_dir, "best.json")
+        summary = dict_utils.serialize_json({
+            "experiment_dir": best['experiment_dir'],
+            "params": best["params"],
+            "results": best["results"],
+        })
+        logging.info(f"Writing results to {summary_path}:\n{summary}")
+        with open(summary_path, "w") as f:
             f.write(summary)
     else:
         return best

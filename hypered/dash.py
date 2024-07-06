@@ -35,12 +35,16 @@ def get_experiment_group_data(group_name):
     experiments = watch.experiment_data[group_name]
     variables = experiments["params"]["vars"]
     metrics = experiments["results"]
-    return flask.jsonify({"variables": variables, "metrics": metrics})
+    if experiments["best"]:
+        best = {"variables": experiments["best"]["params"]["vars"], "metrics": experiments["best"]["results"]}
+    else:
+        best = None
+    return flask.jsonify({"variables": variables, "metrics": metrics, "best": best})
 
 
 def main():
     logging.basicConfig(level=logging.INFO)
-    parser = argparse.ArgumentParser(description="Hyperparameter optimizer.")
+    parser = argparse.ArgumentParser(description="Hyperparameter optimizer dashboard.")
     parser.add_argument("--host", type=str, default=None, help="HTTP server host.")
     parser.add_argument("--port", type=int, default=None, help="HTTP server port.")
     args = parser.parse_args()

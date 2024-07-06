@@ -49,7 +49,13 @@ class Watcher(FileSystemEventHandler):
             results_list.append(results)
         params = dict_utils.join_dicts(params_list)
         results = dict_utils.join_dicts(results_list)
-        return {"params": params, "results": results}
+        best_path = os.path.join(group_path, "best.json")
+        if os.path.exists(best_path):
+            with open(best_path) as best_file:
+                best = json.load(best_file)
+        else:
+            best = None
+        return {"params": params, "results": results, "best": best}
 
     def load_experiment(self, experiment_path: str):
         params_path = os.path.join(experiment_path, "params.json")

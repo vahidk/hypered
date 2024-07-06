@@ -92,6 +92,14 @@ hypered example.conf
 
 This will start the optimization process as defined in your configuration file and output the best parameters.
 
+### Step 4: Visualize the Results on Dashboard
+
+Finally, you can visualize the results of hyper-parameter optimization on hypered-dash with the following command:
+
+```bash
+hypered-dash
+```
+
 ## Reference
 
 ### Optimizers
