@@ -4,10 +4,11 @@ This module provides functions to create minimization and maximization objective
 These functions use a utility function to lookup specific metrics from a nested dictionary structure.
 """
 
-from .common import registry, dict_utils
+from .registry import export
+from ..utils.dict_utils import lookup_flat
 
 
-@registry.export
+@export
 def minimize(name):
     """
     Creates a function to minimize a specified metric.
@@ -20,12 +21,12 @@ def minimize(name):
     """
 
     def _func(metrics):
-        return dict_utils.lookup_flat(metrics, name)
+        return lookup_flat(metrics, name)
 
     return _func
 
 
-@registry.export
+@export
 def maximize(name):
     """
     Creates a function to maximize a specified metric.
@@ -38,6 +39,6 @@ def maximize(name):
     """
 
     def _func(metrics):
-        return -dict_utils.lookup_flat(metrics, name)
+        return -lookup_flat(metrics, name)
 
     return _func

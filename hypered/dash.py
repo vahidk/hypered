@@ -1,7 +1,5 @@
 import argparse
-import json
 import logging
-import os
 
 import flask
 
@@ -23,7 +21,7 @@ def get_experiment_groups():
 
 
 @app.route("/experiment_group/<group_name>/names", methods=["GET"])
-def get_experiment_group_names(group_name):
+def get_experiment_group_names(group_name: str):
     experiments = watch.experiment_data[group_name]
     variables = list(experiments["params"].keys())
     metrics = list(experiments["results"].keys())
@@ -31,12 +29,13 @@ def get_experiment_group_names(group_name):
 
 
 @app.route("/experiment_group/<group_name>/data", methods=["GET"])
-def get_experiment_group_data(group_name):
+def get_experiment_group_data(group_name: str):
     experiments = watch.experiment_data[group_name]
     variables = experiments["params"]
     metrics = experiments["results"]
     if experiments["best"]:
-        best = {"variables": experiments["best"]["params"], "metrics": experiments["best"]["results"]}
+        best = experiments["best"]
+        best = {"variables": best["params"], "metrics": best["results"]}
     else:
         best = None
     return flask.jsonify({"variables": variables, "metrics": metrics, "best": best})

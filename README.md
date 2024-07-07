@@ -1,13 +1,13 @@
 # Hypered: Hyperparameter Optimizer Library
 
-This library provides a flexible interface for optimizing hyperparameters of any blackbox system. It implements bayesian optimization and supports the creation of various types of hyperparameter search spaces, such as real, integer, and categorical variables.
+This library provides a flexible interface for optimizing hyperparameters of any blackbox system. It implements bayesian optimization and supports the creation of various types of hyperparameter search spaces including real, integer, and categorical variables.
 
 ## Features
 
 - **Hyperparameter Spaces**: Define real, integer, and categorical variables.
 - **Objective Functions**: Easily create minimization and maximization objectives.
 - **Experiment Management**: Automatically handles experiment directories and parameter/result files.
-- **Parallel Execution**: Supports parallel execution of experiments.
+- **Web-based Dashboard**: Visualize the experiment results for better insight.
 
 ## Installation
 
@@ -71,7 +71,6 @@ optimize(
     binary="python3 example.py {params_path} {results_path}",
     random_starts=10,
     iterations=30,
-    parallelism=8,
     params={
         "option": categorical(["first", "second"]),
         "x": real(-10, 10)
@@ -113,7 +112,6 @@ This function performs hyperparameter optimization using Gaussian Processes.
 - `random_starts` (int, optional): The number of random initialization points.
 - `iterations` (int, optional): The number of iterations to run the optimization.
 - `seed` (int, optional): The random seed for reproducibility.
-- `parallelism` (int, optional): The number of parallel jobs to run.
 - `cwd` (str, optional): The current working directory for the subprocess.
 
 Note that you can use predefined variables {params_path} and {results_path} in your binary string to specify the path to parameters and results json files accordingly.
@@ -129,14 +127,6 @@ Minimize a given variable.
 Maximize a given variable.
 
 ### Variables
-
-#### `uniform`
-
-Returns the string identifier for a uniform distribution.
-
-#### `log_uniform`
-
-Returns the string identifier for a log-uniform distribution.
 
 #### `real`
 

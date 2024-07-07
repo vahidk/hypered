@@ -1,37 +1,15 @@
 """Hyperparameter optimizer interface.
 
-This module provides an interface for defining hyperparameter optimization spaces using the `skopt` library. 
-It includes functions and classes to create uniform, log-uniform, real, integer, and categorical search spaces.
+This module provides an interface for defining hyperparameter optimization spaces.
+It includes functions and classes to create uniform, log-uniform, real, integer,
+and categorical search spaces.
 """
 
-import skopt
-
-from .common import registry
-
-
-@registry.export
-def uniform():
-    """
-    Returns the string identifier for a uniform distribution.
-
-    Returns:
-        str: The string "uniform".
-    """
-    return "uniform"
+from .registry import exportable
+from ..optim import space
 
 
-@registry.export
-def log_uniform():
-    """
-    Returns the string identifier for a log-uniform distribution.
-
-    Returns:
-        str: The string "log-uniform".
-    """
-    return "log-uniform"
-
-
-class variable(registry.exportable):
+class variable(exportable):
     """
     Base class for defining different types of variables in hyperparameter optimization.
 
@@ -49,25 +27,23 @@ class real(variable):
     Args:
         low (float): The lower bound of the search space.
         high (float): The upper bound of the search space.
-        prior (callable, optional): The prior distribution to use, either uniform or log-uniform. Defaults to uniform.
 
     Methods:
-        __call__(): Creates and returns a `skopt.space.Real` object representing the real-valued search space.
+        __call__(): Creates and returns a `Real` object representing the real-valued search space.
     """
 
-    def __init__(self, low, high, prior=uniform):
+    def __init__(self, low: float, high: float):
         self.low = low
         self.high = high
-        self.prior = prior
 
     def __call__(self):
         """
-        Creates a `skopt.space.Real` object.
+        Creates a `Real` object.
 
         Returns:
-            skopt.space.Real: The real-valued search space object.
+            Real: The real-valued search space object.
         """
-        var = skopt.space.Real(self.low, self.high, self.prior())
+        var = space.Real(self.low, self.high)
         return var
 
 
@@ -80,21 +56,21 @@ class integer(variable):
         high (int): The upper bound of the search space.
 
     Methods:
-        __call__(): Creates and returns a `skopt.space.Integer` object representing the integer-valued search space.
+        __call__(): Creates and returns a `Integer` object representing the integer-valued search space.
     """
 
-    def __init__(self, low, high):
+    def __init__(self, low: int, high: int):
         self.low = low
         self.high = high
 
     def __call__(self):
         """
-        Creates a `skopt.space.Integer` object.
+        Creates a `space.Integer` object.
 
         Returns:
-            skopt.space.Integer: The integer-valued search space object.
+            Integer: The integer-valued search space object.
         """
-        var = skopt.space.Integer(self.low, self.high)
+        var = space.Integer(self.low, self.high)
         return var
 
 
@@ -106,18 +82,18 @@ class categorical(variable):
         categories (list): A list of possible categories for the hyperparameter.
 
     Methods:
-        __call__(): Creates and returns a `skopt.space.Categorical` object representing the categorical search space.
+        __call__(): Creates and returns a `Categorical` object representing the categorical search space.
     """
 
-    def __init__(self, categories):
+    def __init__(self, categories: list):
         self.categories = categories
 
     def __call__(self):
         """
-        Creates a `skopt.space.Categorical` object.
+        Creates a `Categorical` object.
 
         Returns:
-            skopt.space.Categorical: The categorical search space object.
+            Categorical: The categorical search space object.
         """
-        var = skopt.space.Categorical(self.categories)
+        var = space.Categorical(self.categories)
         return var

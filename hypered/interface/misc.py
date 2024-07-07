@@ -5,12 +5,12 @@ for experiments, parameters, and results. It also includes a class for managing 
 in a round-robin fashion.
 """
 
-from .common import registry
+from .registry import exportable
 
 OUTPUT_DIR = "experiments"
 
 
-class experiment_dir(registry.exportable):
+class experiment_dir(exportable):
     """
     Class for retrieving the experiment directory from the context.
 
@@ -31,7 +31,7 @@ class experiment_dir(registry.exportable):
         return ctx["experiment_dir"]
 
 
-class params_path(registry.exportable):
+class params_path(exportable):
     """
     Class for retrieving the parameters path from the context.
 
@@ -52,7 +52,7 @@ class params_path(registry.exportable):
         return ctx["params_path"]
 
 
-class results_path(registry.exportable):
+class results_path(exportable):
     """
     Class for retrieving the results path from the context.
 
@@ -73,7 +73,7 @@ class results_path(registry.exportable):
         return ctx["results_path"]
 
 
-class device_id(registry.exportable):
+class device_id(exportable):
     """
     Class for managing device IDs in a round-robin fashion.
 

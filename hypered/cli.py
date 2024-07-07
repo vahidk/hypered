@@ -14,8 +14,8 @@ Args:
 import argparse
 import logging
 
-from . import interface
-from .interface.common import registry
+from . import interface  # noqa: F401
+from .interface.registry import get_symbols
 
 
 def main():
@@ -27,7 +27,7 @@ def main():
     args = parser.parse_args()
 
     cfg = open(args.config).read()
-    eval(cfg, registry.get_symbols())
+    eval(cfg, get_symbols())
 
 
 if __name__ == "__main__":

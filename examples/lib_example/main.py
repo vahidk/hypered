@@ -37,7 +37,6 @@ def main():
         function=eval_objective,
         random_starts=10,
         iterations=30,
-        parallelism=8,
         params={
             "option": hp.categorical(["first", "second"]),
             "x": hp.real(-10, 10),

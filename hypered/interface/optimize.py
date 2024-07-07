@@ -1,6 +1,6 @@
 """Hyperparameter optimizer interface.
 
-This module provides a function to optimize hyperparameters using Gaussian Process minimization with `skopt`.
+This module provides a function to optimize hyperparameters using Gaussian Processes.
 It supports the creation of experiments, managing directories, and executing subprocesses for the experiments.
 """
 
@@ -10,13 +10,20 @@ import shlex
 import subprocess
 from typing import Callable, Optional
 
-import skopt
-
 from . import misc, variable
-from .common import dict_utils, registry
+from .registry import export
+from ..optim.bayesian_optimization import bayesian_optimization
+from ..utils.dict_utils import (
+    merge_dicts,
+    unwrap_dict,
+    wrap_dict,
+    serialize_json,
+    deserialize_json,
+    hash_json,
+)
 
 
-@registry.export
+@export
 def optimize(
     name: str,
     objective: Callable,
@@ -25,7 +32,6 @@ def optimize(
     function: Optional[Callable] = None,
     random_starts: int = 10,
     iterations: int = 100,
-    seed: int = 0,
     parallelism: int = 1,
     cwd: Optional[str] = None,
 ):
@@ -40,7 +46,6 @@ def optimize(
         function (function, optional): The function to execute the experiment.
         random_starts (int, optional): The number of random initialization points. Defaults to 10.
         iterations (int, optional): The number of iterations to run the optimization. Defaults to 100.
-        seed (int, optional): The random seed for reproducibility. Defaults to 0.
         parallelism (int, optional): The number of parallel jobs to run. Defaults to 1.
         cwd (str, optional): The current working directory for the subprocess. Defaults to None.
 
@@ -57,15 +62,15 @@ def optimize(
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
 
-    unwraped_params = dict_utils.unwrap_dict(params)
+    unwraped_params = unwrap_dict(params)
 
     # Extract all variables
     keys = []
-    space = []
+    vars = []
     for k, v in unwraped_params.items():
         if isinstance(v, variable.variable):
             keys.append(k)
-            space.append(v())
+            vars.append(v())
 
     experiments = []
 
@@ -81,19 +86,17 @@ def optimize(
         """
         # Merge base parameters with sampled params
         sample_params = dict(zip(keys, values))
-        merged_params = dict_utils.merge_dicts(unwraped_params, sample_params)
-        wraped_params = dict_utils.wrap_dict(merged_params)
+        merged_params = merge_dicts(unwraped_params, sample_params)
+        wraped_params = wrap_dict(merged_params)
 
         logging.info(
             "Evaluating parameters: %s",
-            dict_utils.serialize_json(sample_params, indent=4),
+            serialize_json(sample_params, indent=4),
         )
 
         # Create temporary experiment directory
         if binary is not None:
-            experiment_dir = os.path.join(
-                output_dir, dict_utils.hash_json(sample_params)
-            )
+            experiment_dir = os.path.join(output_dir, hash_json(sample_params))
             if not os.path.exists(experiment_dir):
                 os.makedirs(experiment_dir)
 
@@ -125,7 +128,7 @@ def optimize(
         elif binary is not None:
             # Write params to file
             with open(params_path, "w") as f:
-                f.write(dict_utils.serialize_json(wraped_params, indent=4))
+                f.write(serialize_json(wraped_params, indent=4))
 
             # Call subprocess to perform the experiment
             if not os.path.exists(results_path):
@@ -140,46 +143,45 @@ def optimize(
 
             # Read results
             with open(results_path) as f:
-                results = dict_utils.deserialize_json(f.read())
+                results = deserialize_json(f.read())
         else:
             raise ValueError("Either binary or function must be provided.")
 
-        obj_val = objective(results)
+        loss_val = objective(results)
 
         experiments.append(
             {
-                "params": dict_utils.wrap_dict(sample_params),
+                "params": wrap_dict(sample_params),
                 "results": results,
-                "objective": obj_val,
+                "loss": loss_val,
                 **extra_params,
             }
         )
 
-        return obj_val
+        return loss_val
 
-    res: skopt.OptimizeResult = skopt.gp_minimize(
+    bayesian_optimization(
         _eval,
-        space,
-        n_random_starts=random_starts,
+        vars,
+        n_initial_points=random_starts,
         n_calls=iterations,
-        random_state=seed,
-        n_jobs=parallelism,
     )
 
     # Find the best experiment results
     best = experiments[0]
     for exp in experiments:
-        if exp["objective"] < best["objective"]:
+        if exp["loss"] < best["loss"]:
             best = exp
-    assert res.fun == best["objective"]
 
     if binary is not None:
         summary_path = os.path.join(output_dir, "best.json")
-        summary = dict_utils.serialize_json({
-            "experiment_dir": best['experiment_dir'],
-            "params": best["params"],
-            "results": best["results"],
-        })
+        summary = serialize_json(
+            {
+                "experiment_dir": best["experiment_dir"],
+                "params": best["params"],
+                "results": best["results"],
+            }
+        )
         logging.info(f"Writing results to {summary_path}:\n{summary}")
         with open(summary_path, "w") as f:
             f.write(summary)

@@ -4,7 +4,7 @@ import os
 from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
-from hypered.interface.common import dict_utils
+from ..utils.dict_utils import join_dicts
 
 
 class Watcher(FileSystemEventHandler):
@@ -47,8 +47,8 @@ class Watcher(FileSystemEventHandler):
                 continue
             params_list.append(params)
             results_list.append(results)
-        params = dict_utils.join_dicts(params_list)
-        results = dict_utils.join_dicts(results_list)
+        params = join_dicts(params_list)
+        results = join_dicts(results_list)
         best_path = os.path.join(group_path, "best.json")
         if os.path.exists(best_path):
             with open(best_path) as best_file:
