@@ -1,4 +1,4 @@
-# Hypered: Hyperparameter Optimizer Library
+# Hypered: Hyperparameter Optimization Library
 
 This library provides a flexible interface for optimizing hyperparameters of any blackbox system. It implements bayesian optimization and supports the creation of various types of hyperparameter search spaces including real, integer, and categorical variables.
 

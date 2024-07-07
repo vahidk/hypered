@@ -26,6 +26,7 @@ setup(
     packages=find_packages(),
     license="MIT",
     install_requires=install_requires,
+    test_suite='tests',
     package_data={
         'hypered': ['templates/*.html'],
     },
