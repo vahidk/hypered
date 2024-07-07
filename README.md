@@ -1,6 +1,11 @@
-# Hypered: Hyperparameter Optimization Library
+<h1 align="center">
+<img src="https://raw.githubusercontent.com/vahidk/hypered/main/media/hypered.png" alt="SafeConfig Library" width="256">
+</h1><br>
 
-This library provides a flexible interface for optimizing hyperparameters of any blackbox system. It implements bayesian optimization and supports the creation of various types of hyperparameter search spaces including real, integer, and categorical variables.
+
+[![PyPI - Downloads](https://img.shields.io/pypi/dm/hypered)](https://pypi.org/project/hypered/)
+
+Hypered provides a flexible interface for optimizing hyperparameters of any blackbox system. It implements bayesian optimization and supports the creation of various types of hyperparameter search spaces including real, integer, and categorical variables.
 
 ## Features
 
