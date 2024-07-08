@@ -32,7 +32,10 @@ def optimize(
     function: Optional[Callable] = None,
     random_starts: int = 10,
     iterations: int = 100,
-    parallelism: int = 1,
+    kernel: str = "RBF",
+    kernel_scale: float = 1.0,
+    acquisition_fn: str = "EI",
+    optimizer_restarts: int = 5,
     cwd: Optional[str] = None,
 ):
     """
@@ -46,7 +49,10 @@ def optimize(
         function (function, optional): The function to execute the experiment.
         random_starts (int, optional): The number of random initialization points. Defaults to 10.
         iterations (int, optional): The number of iterations to run the optimization. Defaults to 100.
-        parallelism (int, optional): The number of parallel jobs to run. Defaults to 1.
+        kernel (str, optional): The type of kernel to use in the Gaussian process model. Defaults to "RBF".
+        kernel_scale (float, optional): The scale of the kernel. Defaults to 1.0.
+        acquisition_fn (str, optional): The type of acquisition function to use. Defaults to "EI".
+        optimizer_restarts (int, optional): The number of restarts for the optimizer. Defaults to 5.
         cwd (str, optional): The current working directory for the subprocess. Defaults to None.
 
     Returns:
@@ -163,8 +169,12 @@ def optimize(
     bayesian_optimization(
         _eval,
         vars,
+        kernel_type=kernel,
+        kernel_scale=kernel_scale,
+        acquisition_fn_type=acquisition_fn,
         n_initial_points=random_starts,
         n_calls=iterations,
+        n_optimizer_restarts=optimizer_restarts,
     )
 
     # Find the best experiment results

@@ -7,7 +7,7 @@ from hypered.optim.kernel import RBF, Matern
 
 class TestRBFKernel(unittest.TestCase):
     def test_rbf_kernel(self):
-        rbf = RBF(length_scale=1.0)
+        rbf = RBF(scale=1.0)
         x1 = np.array([[0, 0], [1, 1]])
         x2 = np.array([[0, 0], [1, 1]])
 
@@ -15,8 +15,8 @@ class TestRBFKernel(unittest.TestCase):
         result = rbf(x1, x2)
         np.testing.assert_array_almost_equal(result, expected_result)
 
-    def test_rbf_kernel_different_length_scale(self):
-        rbf = RBF(length_scale=2.0)
+    def test_rbf_kernel_different_scale(self):
+        rbf = RBF(scale=2.0)
         x1 = np.array([[0, 0], [1, 1]])
         x2 = np.array([[0, 0], [1, 1]])
 
@@ -27,7 +27,7 @@ class TestRBFKernel(unittest.TestCase):
 
 class TestMaternKernel(unittest.TestCase):
     def test_matern_kernel_nu_0_5(self):
-        matern = Matern(nu=0.5, length_scale=1.0)
+        matern = Matern(nu=0.5, scale=1.0)
         x1 = np.array([[0, 0], [1, 1]])
         x2 = np.array([[0, 0], [1, 1]])
 
@@ -37,7 +37,7 @@ class TestMaternKernel(unittest.TestCase):
         np.testing.assert_array_almost_equal(result, expected_result)
 
     def test_matern_kernel_nu_1_5(self):
-        matern = Matern(nu=1.5, length_scale=1.0)
+        matern = Matern(nu=1.5, scale=1.0)
         x1 = np.array([[0, 0], [1, 1]])
         x2 = np.array([[0, 0], [1, 1]])
 
@@ -47,7 +47,7 @@ class TestMaternKernel(unittest.TestCase):
         np.testing.assert_array_almost_equal(result, expected_result)
 
     def test_matern_kernel_nu_2_5(self):
-        matern = Matern(nu=2.5, length_scale=1.0)
+        matern = Matern(nu=2.5, scale=1.0)
         x1 = np.array([[0, 0], [1, 1]])
         x2 = np.array([[0, 0], [1, 1]])
 
@@ -60,7 +60,7 @@ class TestMaternKernel(unittest.TestCase):
 
     def test_matern_kernel_invalid_nu(self):
         with self.assertRaises(ValueError):
-            matern = Matern(nu=1.0, length_scale=1.0)
+            matern = Matern(nu=1.0, scale=1.0)
             x1 = np.array([[0, 0], [1, 1]])
             x2 = np.array([[0, 0], [1, 1]])
             matern(x1, x2)

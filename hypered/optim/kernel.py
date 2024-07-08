@@ -50,14 +50,14 @@ class Kernel(ABC):
 class RBF(Kernel):
     NAME = "RBF"
 
-    def __init__(self, length_scale=1.0):
+    def __init__(self, scale=1.0):
         """
         Initializes the RBF kernel.
 
         Args:
-            length_scale (float): The length scale parameter of the RBF kernel.
+            scale (float): The length scale parameter of the RBF kernel.
         """
-        self.length_scale = length_scale
+        self.scale = scale
 
     def __call__(self, x1: np.ndarray, x2: np.ndarray):
         """
@@ -71,8 +71,8 @@ class RBF(Kernel):
             np.ndarray: The RBF kernel matrix.
         """
         distance = cdist(
-            x1 / self.length_scale,
-            x2 / self.length_scale,
+            x1 / self.scale,
+            x2 / self.scale,
             metric="sqeuclidean",
         )
         return np.exp(-0.5 * distance)
@@ -81,16 +81,16 @@ class RBF(Kernel):
 class Matern(Kernel):
     NAME = "Matern"
 
-    def __init__(self, nu: float = 1.5, length_scale: float = 1.0):
+    def __init__(self, nu: float = 1.5, scale: float = 1.0):
         """
         Initializes the Matern kernel.
 
         Args:
             nu (float): The smoothness parameter of the Matern kernel.
-            length_scale (float): The length scale parameter of the Matern kernel.
+            scale (float): The length scale parameter of the Matern kernel.
         """
         self.nu = nu
-        self.length_scale = length_scale
+        self.scale = scale
 
     def __call__(self, x1: np.ndarray, x2: np.ndarray):
         """
@@ -107,8 +107,8 @@ class Matern(Kernel):
             ValueError: If nu is not one of the supported values (0.5, 1.5, 2.5).
         """
         distance = cdist(
-            x1 / self.length_scale,
-            x2 / self.length_scale,
+            x1 / self.scale,
+            x2 / self.scale,
             metric="euclidean",
         )
 

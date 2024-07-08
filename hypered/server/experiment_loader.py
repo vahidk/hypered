@@ -1,33 +1,21 @@
 import json
 import os
 
-from watchdog.events import FileSystemEventHandler
-from watchdog.observers import Observer
-
 from ..utils.dict_utils import join_dicts
 
 
-class Watcher(FileSystemEventHandler):
+class ExperimentLoader:
     experiment_data = {}
 
     def __init__(self, directory):
         super().__init__()
         self.directory = directory
-        self.load_experiments()
-        self.observer = self.create_observer()
-
-    def create_observer(self):
-        observer = Observer()
-        observer.schedule(self, path=self.directory, recursive=True)
-        observer.start()
-
-    def on_modified(self, event):
-        if event.is_directory:
-            return
-        self.load_experiments()
 
     def load_experiments(self):
         self.experiment_data = {}
+        if not os.path.exists(self.directory):
+            print("Directory does not exist")
+            return
         for experiment_group in os.listdir(self.directory):
             group_data = self.load_experiment_group(experiment_group)
             if group_data is None:

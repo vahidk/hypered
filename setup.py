@@ -5,7 +5,7 @@ from distutils.core import setup
 from setuptools import find_packages
 
 # List of runtime dependencies required by this built package
-install_requires = ["scikit-optimize", "flask", "watchdog"]
+install_requires = ["scikit-optimize", "flask"]
 if sys.version_info <= (2, 7):
     install_requires += ["future", "typing"]
 
@@ -16,7 +16,7 @@ with open(os.path.join(this_directory, "README.md")) as f:
 
 setup(
     name="hypered",
-    version="1.0.6",
+    version="1.0.7",
     description="Simple hyper parameter tuning model.",
     long_description=long_description,
     long_description_content_type="text/markdown",

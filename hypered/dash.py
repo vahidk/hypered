@@ -3,26 +3,27 @@ import logging
 
 import flask
 
-from .interface import misc
-from .server import watcher
+from .interface.misc import OUTPUT_DIR
+from .server.experiment_loader import ExperimentLoader
 
 app = flask.Flask(__name__)
-watch = watcher.Watcher(misc.OUTPUT_DIR)
+el = ExperimentLoader(OUTPUT_DIR)
 
 
 @app.route("/")
 def index():
+    el.load_experiments()
     return flask.render_template("index.html")
 
 
 @app.route("/experiment_groups", methods=["GET"])
 def get_experiment_groups():
-    return flask.jsonify(list(watch.experiment_data.keys()))
+    return flask.jsonify(list(el.experiment_data.keys()))
 
 
 @app.route("/experiment_group/<group_name>/names", methods=["GET"])
 def get_experiment_group_names(group_name: str):
-    experiments = watch.experiment_data[group_name]
+    experiments = el.experiment_data[group_name]
     variables = list(experiments["params"].keys())
     metrics = list(experiments["results"].keys())
     return flask.jsonify({"variables": variables, "metrics": metrics})
@@ -30,7 +31,7 @@ def get_experiment_group_names(group_name: str):
 
 @app.route("/experiment_group/<group_name>/data", methods=["GET"])
 def get_experiment_group_data(group_name: str):
-    experiments = watch.experiment_data[group_name]
+    experiments = el.experiment_data[group_name]
     variables = experiments["params"]
     metrics = experiments["results"]
     if experiments["best"]:

@@ -18,7 +18,7 @@ class GaussianProcess:
 
         Args:
             kernel (Kernel): The kernel function used to compute the covariance matrix.
-            sigma_n (float, optional): The noise parameter added to the diagonal of the covariance matrix. Defaults to 1e-6.
+            sigma_n (float, optional): Observation noise. Defaults to 1e-6.
         """
         self.kernel = kernel
         self.sigma_n = sigma_n
