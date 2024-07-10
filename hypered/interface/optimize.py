@@ -43,7 +43,7 @@ def optimize(
 
     Args:
         name (str): The name of the parameter group.
-        objective (function): The objective function to minimize. It should take a dictionary of results and return a scalar value.
+        objective (function): The objective function to minimize.
         params (dict): The dictionary of parameters to optimize.
         binary (str, optional): The command line binary to execute the experiment.
         function (function, optional): The function to execute the experiment.

@@ -1,6 +1,6 @@
 import unittest
 import numpy as np
-from unittest.mock import MagicMock, call
+from unittest.mock import MagicMock
 
 from hypered.optim.kernel import Kernel
 from hypered.optim.gaussian_process import GaussianProcess

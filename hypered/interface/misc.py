@@ -1,7 +1,7 @@
 """Hyperparameter optimizer interface.
 
-This module provides functionality for managing output directories and contextual paths 
-for experiments, parameters, and results. It also includes a class for managing device IDs 
+This module provides functionality for managing output directories and contextual paths
+for experiments, parameters, and results. It also includes a class for managing device IDs
 in a round-robin fashion.
 """
 
