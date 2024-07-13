@@ -118,7 +118,7 @@ This function performs hyperparameter optimization using Gaussian Processes.
 - `iterations` (int, optional): The number of iterations to run the optimization.
 - `kernel` (str, optional): The type of kernel to use in the Gaussian process model. Defaults to "RBF".
 - `kernel_scale` (float, optional): The scale of the kernel. Defaults to 1.0.
-- `acquisition_fn` (str, optional): The type of acquisition function to use. Defaults to "EI".
+- `acquisition_fn` (str, optional): The type of acquisition function to use. Defaults to "UCB".
 - `optimizer_restarts` (int, optional): The number of restarts for the optimizer. Defaults to 5.
 - `seed` (int, optional): The random seed for reproducibility.
 - `cwd` (str, optional): The current working directory for the subprocess.

@@ -34,7 +34,7 @@ def optimize(
     iterations: int = 100,
     kernel: str = "RBF",
     kernel_scale: float = 1.0,
-    acquisition_fn: str = "EI",
+    acquisition_fn: str = "UCB",
     optimizer_restarts: int = 5,
     cwd: Optional[str] = None,
 ):

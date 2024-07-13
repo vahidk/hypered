@@ -73,9 +73,8 @@ class UpperConfidenceBound(AcquisitionFn):
         ndarray: The evaluated Upper Confidence Bound values.
         """
         mu, cov = model.predict(x)
-        sigma = np.sqrt(np.diag(cov))
-        return mu + self.kappa * sigma
-
+        sigma = np.sqrt(np.diag(cov)).reshape(1, -1)
+        return mu - self.kappa * sigma
 
 class ExpectedImprovement(AcquisitionFn):
     NAME = "EI"
@@ -102,8 +101,8 @@ class ExpectedImprovement(AcquisitionFn):
         ndarray: The evaluated Expected Improvement values.
         """
         mu, cov = model.predict(x)
-        sigma = np.sqrt(np.diag(cov))
-        imp = mu - y_opt - self.xi
+        sigma = np.sqrt(np.diag(cov)).reshape(1, -1)
+        imp = y_opt - mu - self.xi
         Z = imp / sigma
         ei = imp * norm.cdf(Z) + sigma * norm.pdf(Z)
-        return ei
+        return -ei

@@ -43,7 +43,7 @@ def bayesian_optimization(
     vars: list[Variable],
     kernel_type: str = "RBF",
     kernel_scale: float = 1.0,
-    acquisition_fn_type: str = "EI",
+    acquisition_fn_type: str = "UCB",
     n_initial_points: int = 10,
     n_calls: int = 100,
     n_optimizer_restarts: int = 5,

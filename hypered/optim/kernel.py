@@ -55,7 +55,7 @@ class RBF(Kernel):
         Initializes the RBF kernel.
 
         Args:
-            scale (float): The length scale parameter of the RBF kernel.
+            scale (float): The scale parameter of the RBF kernel.
         """
         self.scale = scale
 
@@ -87,7 +87,7 @@ class Matern(Kernel):
 
         Args:
             nu (float): The smoothness parameter of the Matern kernel.
-            scale (float): The length scale parameter of the Matern kernel.
+            scale (float): The scale parameter of the Matern kernel.
         """
         self.nu = nu
         self.scale = scale
